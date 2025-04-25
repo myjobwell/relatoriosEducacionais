@@ -1,4 +1,5 @@
 "use client"
+
 import { useState } from "react"
 import { FiSettings } from "react-icons/fi"
 
@@ -12,7 +13,8 @@ interface IndicatorPanelProps {
 export default function IndicatorPanel({ title, iconName, color }: IndicatorPanelProps) {
   const [category, subcategory] = title.split(" DE ")
   const normalized = subcategory?.toUpperCase()
-  const hasExtraFields = normalized === "RESULTADOS" || normalized === "GESTÃO"
+  const isGestao = normalized === "GESTÃO"
+  const hasExtraFields = isGestao || normalized === "RESULTADOS"
 
   const iconSrc = {
     location: "/location.png",
@@ -20,13 +22,12 @@ export default function IndicatorPanel({ title, iconName, color }: IndicatorPane
     chart: "/chart.png",
   }[iconName]
 
-  // Estados dos campos
+  // States
   const [municipio, setMunicipio] = useState("")
   const [ano, setAno] = useState("")
   const [dependencia, setDependencia] = useState("")
   const [localizacao, setLocalizacao] = useState("")
-
-  // Erros
+  const [escolaridade, setEscolaridade] = useState("")
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({})
 
   const handleGenerate = () => {
@@ -36,22 +37,23 @@ export default function IndicatorPanel({ title, iconName, color }: IndicatorPane
     if (!ano) newErrors.ano = true
     if (hasExtraFields && !dependencia) newErrors.dependencia = true
     if (hasExtraFields && !localizacao) newErrors.localizacao = true
+    if (isGestao && !escolaridade) newErrors.escolaridade = true
 
     setErrors(newErrors)
 
     if (Object.keys(newErrors).length === 0) {
-      alert("Todos os campos preenchidos! Pronto para gerar relatório.")
+      alert("Relatório gerado com sucesso!")
     }
   }
 
   const baseSelectClass =
-    "w-full sm:w-auto min-w-[140px] py-2 px-3 rounded-md text-sm bg-slate-100 shadow-sm focus:outline-none focus:ring-2"
+    "py-2 px-3 rounded-md text-sm bg-slate-100 shadow-sm focus:outline-none focus:ring-2"
   const errorClass = "border border-red-500 ring-red-500"
 
   return (
     <div className="bg-white rounded-xl shadow-md px-4 py-6 w-full overflow-hidden">
       <div className="flex flex-col lg:flex-row items-center justify-between max-w-[1200px] mx-auto gap-6">
-        {/* Ícone e Título */}
+        {/* Título */}
         <div className="flex items-center gap-4 flex-shrink-0 w-full lg:w-auto justify-center lg:justify-start">
           {iconSrc && (
             <img src={iconSrc} alt={`${iconName} icon`} className="h-14 w-14 object-contain" />
@@ -64,12 +66,12 @@ export default function IndicatorPanel({ title, iconName, color }: IndicatorPane
           </div>
         </div>
 
-        {/* Campos e Botão */}
-        <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full items-center justify-center lg:justify-end">
+        {/* Formulário */}
+        <div className="w-full flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-end items-stretch">
           {/* Município */}
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col w-full sm:w-auto">
             <select
-              className={`${baseSelectClass} ${
+              className={`w-full min-w-[160px] ${baseSelectClass} ${
                 errors.municipio ? errorClass : "text-slate-700 focus:ring-sky-400"
               }`}
               value={municipio}
@@ -103,9 +105,9 @@ export default function IndicatorPanel({ title, iconName, color }: IndicatorPane
           </div>
 
           {/* Ano */}
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col w-full sm:w-auto">
             <select
-              className={`${baseSelectClass} ${
+              className={`w-full min-w-[120px] ${baseSelectClass} ${
                 errors.ano ? errorClass : "text-slate-700 focus:ring-sky-400"
               }`}
               value={ano}
@@ -119,11 +121,11 @@ export default function IndicatorPanel({ title, iconName, color }: IndicatorPane
             {errors.ano && <p className="text-red-500 text-xs mt-1">Campo obrigatório</p>}
           </div>
 
-          {/* Extra Select 1 */}
+          {/* Dependência */}
           {hasExtraFields && (
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col w-full sm:w-auto">
               <select
-                className={`${baseSelectClass} ${
+                className={`w-full min-w-[160px] ${baseSelectClass} ${
                   errors.dependencia ? errorClass : "text-slate-700 focus:ring-sky-400"
                 }`}
                 value={dependencia}
@@ -139,11 +141,11 @@ export default function IndicatorPanel({ title, iconName, color }: IndicatorPane
             </div>
           )}
 
-          {/* Extra Select 2 */}
+          {/* Localização */}
           {hasExtraFields && (
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col w-full sm:w-auto">
               <select
-                className={`${baseSelectClass} ${
+                className={`w-full min-w-[160px] ${baseSelectClass} ${
                   errors.localizacao ? errorClass : "text-slate-700 focus:ring-sky-400"
                 }`}
                 value={localizacao}
@@ -154,6 +156,29 @@ export default function IndicatorPanel({ title, iconName, color }: IndicatorPane
                 <option value="Rural">Rural</option>
               </select>
               {errors.localizacao && (
+                <p className="text-red-500 text-xs mt-1">Campo obrigatório</p>
+              )}
+            </div>
+          )}
+
+          {/* Escolaridade (SOMENTE para GESTÃO) */}
+          {isGestao && (
+            <div className="flex flex-col w-full sm:w-auto">
+              <select
+                className={`w-full min-w-[160px] ${baseSelectClass} ${
+                  errors.escolaridade ? errorClass : "text-slate-700 focus:ring-sky-400"
+                }`}
+                value={escolaridade}
+                onChange={(e) => setEscolaridade(e.target.value)}
+              >
+                <option value="">Escolaridade</option>
+                <option value="Creche">Educação Infantil</option>
+                <option value="Pré-escola">Pré-escola</option>
+                <option value="Anos Iniciais">Anos Iniciais</option>
+                <option value="Anos Finais">Anos Finais</option>
+                <option value="Ensino Médio">Ensino Médio</option>
+              </select>
+              {errors.escolaridade && (
                 <p className="text-red-500 text-xs mt-1">Campo obrigatório</p>
               )}
             </div>
