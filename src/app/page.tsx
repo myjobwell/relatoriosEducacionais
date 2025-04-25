@@ -105,23 +105,26 @@ export default function Home() {
 
         <div className="h-1 bg-sky-200 mb-12 rounded-full"></div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Painéis em linha com rolagem horizontal em telas pequenas */}
+        <div className="flex flex-col md:flex gap-8 overflow-x-auto pb-4">
           {indicatorSections.map((section) => (
-            <IndicatorPanel
-              key={section.id}
-              title={section.title}
-              iconName={section.iconName}
-              color={section.color}
-              items={section.items}
-            />
+            <div key={section.id} className="flex-shrink-0 w-full md:w-auto">
+              <IndicatorPanel
+                title={section.title}
+                iconName={section.iconName}
+                color={section.color}
+                items={section.items}
+              />
+            </div>
           ))}
         </div>
       </main>
 
-      {/* Footer com padding top */}
+      {/* Footer com padding bottom */}
       <footer className="pb-6">
         <Footer />
       </footer>
     </div>
   )
 }
+
